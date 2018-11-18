@@ -218,7 +218,7 @@ if __name__ == '__main__':
     print(classif_report)
 
     # Visualize model architecture
-    plot_model(clf.model, to_file='tmp/model_structure.png', show_shapes=True)
+    plot_model(clf.model, to_file='tmp/dnn_model_structure.png', show_shapes=True)
 
     # Finally save model
-    clf.model.save('/tmp/keras_mlp.h5')
+    clf.model.save('/tmp/dnn_keras_mlp.h5')
