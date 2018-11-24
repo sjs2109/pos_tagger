@@ -1,26 +1,35 @@
-
-# Import the toolkit and tags
-import nltk
-from nltk.corpus import treebank
-
-# Train data - pretagged
-train_data = treebank.tagged_sents()[:3000]
-
-print(train_data[0])
-
 # Import HMM module
 from nltk.tag import hmm
 
-# Setup a trainer with default(None) values
-# And train with the data
+import random
+from nltk.stem import PorterStemmer
+from nltk.corpus import brown
+
+
+SEED = 42
+random.seed(SEED)
+
+all_data = list(brown.tagged_sents(tagset='universal'))
+
+random.shuffle(all_data)
+i = int(len(all_data)*0.2)
+
+porter = PorterStemmer()
+
+"""
+train_data = [[(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[:i]]
+test_data = [[(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[i:]]
+
 trainer = hmm.HiddenMarkovModelTrainer()
 tagger = trainer.train_supervised(train_data)
 
-print(tagger)
-# Prints the basic data about the tagger
+print(tagger.evaluate(test_data))
+"""
 
-print(tagger.tag("Today is a good day .".split()))
-
-print(tagger.tag("Joe met Joanne in Delhi .".split()))
-
-print(tagger.tag("Chicago is the birthplace of Ginny".split()))
+for _ in range(10):
+    random.shuffle(all_data)
+    train_data = [ [(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[:i]]
+    test_data = [ [(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[i:]]
+    trainer = hmm.HiddenMarkovModelTrainer()
+    tagger = trainer.train_supervised(train_data)
+    print(tagger.evaluate(train_data), tagger.evaluate(test_data))

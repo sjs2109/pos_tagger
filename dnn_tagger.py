@@ -2,18 +2,16 @@ from __future__ import print_function
 
 import random
 
-import nltk
 from nltk.corpus import treebank
 import numpy as np
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import classification_report
 from keras.layers import Dense, Dropout, Activation
 from keras.models import Sequential
 from keras.utils import np_utils, plot_model
 from keras.wrappers.scikit_learn import KerasClassifier
 import matplotlib.pyplot as plt
-
+from nltk.corpus import brown
 CUSTOM_SEED = 42
 
 
@@ -125,12 +123,12 @@ def plot_model_performance(train_loss, train_acc, train_val_loss, train_val_acc)
 
 
 if __name__ == '__main__':
-    nb_samples = 100
+    nb_samples = 20
 
     # Ensure reproducibility
     np.random.seed(CUSTOM_SEED)
 
-    sentences = treebank.tagged_sents(tagset='universal')[:nb_samples]
+    sentences = brown.tagged_sents(tagset='universal')[:nb_samples]
     print('a random sentence: \n-> {}'.format(random.choice(sentences)))
 
     tags = set([tag for sentence in treebank.tagged_sents() for _, tag in sentence])
@@ -142,7 +140,7 @@ if __name__ == '__main__':
     training_sentences = sentences[:train_test_cutoff]
     testing_sentences = sentences[train_test_cutoff:]
 
-    train_val_cutoff = int(.25 * len(training_sentences))
+    train_val_cutoff = int(.20 * len(training_sentences))
     validation_sentences = training_sentences[:train_val_cutoff]
     training_sentences = training_sentences[train_val_cutoff:]
 
@@ -181,7 +179,7 @@ if __name__ == '__main__':
         'input_dim': X_train_vect.shape[1],
         'hidden_neurons': 512,
         'output_dim': y_train_dummy.shape[1],
-        'epochs': 100,
+        'epochs': 10,
         'batch_size': 256,
         'verbose': 1,
         'validation_data': (X_val_vect, y_val_dummy),
@@ -203,19 +201,10 @@ if __name__ == '__main__':
     )
 
     # Evaluate model accuracy
+
     score = clf.score(X_test_vect, y_test_dummy, verbose=0)
     print('model accuracy: {}'.format(score))
 
-    # Compute classification report
-    y_preds = clf.predict(X_test_vect)
-    # Our target names are our label encoded targets
-    target_names = label_encoder.classes_
-    # Compute classification report
-    classif_report = classification_report(
-        y_true=y_test_enc, y_pred=y_preds,
-        target_names=target_names
-    )
-    print(classif_report)
 
     # Visualize model architecture
     plot_model(clf.model, to_file='tmp/dnn_model_structure.png', show_shapes=True)
