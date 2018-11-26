@@ -26,7 +26,7 @@ tagger = trainer.train_supervised(train_data)
 print(tagger.evaluate(test_data))
 """
 
-for _ in range(10):
+for _ in range(200):
     random.shuffle(all_data)
     train_data = [ [(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[:i]]
     test_data = [ [(porter.stem(word.lower()), tag) for word, tag in sent] for sent in all_data[i:]]

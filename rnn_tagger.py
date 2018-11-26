@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     model.summary()
 
-    model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=10, validation_split=0.2)
+    model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=20, validation_split=0.2)
 
     score = model.evaluate(test_sentences_X, to_categorical(test_tags_y, len(tag2index)), verbose=0)
     print(model.metrics_names)
