@@ -179,7 +179,7 @@ if __name__ == '__main__':
         'input_dim': X_train_vect.shape[1],
         'hidden_neurons': 512,
         'output_dim': y_train_dummy.shape[1],
-        'epochs': 20,
+        'epochs': 10,
         'batch_size': 256,
         'verbose': 1,
         'validation_data': (X_val_vect, y_val_dummy),
