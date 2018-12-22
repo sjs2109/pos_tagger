@@ -8,6 +8,10 @@ from sklearn.model_selection import train_test_split
 from keras import backend as K
 import numpy as np
 from nltk.corpus import brown
+from keras.callbacks import EarlyStopping
+early_stopping = EarlyStopping(patience=3)
+import matplotlib.pyplot as plt
+
 
 
 def to_categorical(sequences, categories):
@@ -126,11 +130,29 @@ if __name__ == '__main__':
 
     model.summary()
 
-    model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=10, validation_split=0.2)
+    hist = model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=3, validation_split=0.2,callbacks=[early_stopping])
 
     score = model.evaluate(test_sentences_X, to_categorical(test_tags_y, len(tag2index)), verbose=0)
     print(model.metrics_names)
 
     print('model loss: {} acc: {}  ignore_accuracy : {}'.format(score[0], score[1],score[2]))
     plot_model(model, to_file='tmp/rnn_model_structure.png', show_shapes=True)
+
+    fig, loss_ax = plt.subplots()
+
+    acc_ax = loss_ax.twinx()
+
+    loss_ax.plot(hist.history['loss'], 'y', label='train loss')
+    loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
+
+    acc_ax.plot(hist.history['acc'], 'b', label='train acc')
+    acc_ax.plot(hist.history['val_acc'], 'g', label='val acc')
+
+    loss_ax.set_xlabel('epoch')
+    loss_ax.set_ylabel('loss')
+    acc_ax.set_ylabel('accuray')
+
+    loss_ax.legend(loc='upper left')
+    acc_ax.legend(loc='lower left')
+    plt.savefig("tmp/rnn_tagger_hist.png",dpi=300)
 

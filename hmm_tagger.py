@@ -9,7 +9,7 @@ from nltk.corpus import brown
 SEED = 42
 random.seed(SEED)
 
-all_data = list(brown.tagged_sents(tagset='universal'))
+all_data = list(brown.tagged_sents())
 
 random.shuffle(all_data)
 i = int(len(all_data)*0.2)
