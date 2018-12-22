@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from nltk.corpus import brown
 CUSTOM_SEED = 42
 
+from keras.callbacks import EarlyStopping
+early_stopping = EarlyStopping(patience=10) # 조기종료 콜백함수 정의
 
 def add_basic_features(sentence_terms, index):
     """ Compute some very basic word features.
@@ -119,7 +121,7 @@ def plot_model_performance(train_loss, train_acc, train_val_loss, train_val_acc)
         ax2.set_title('Model accuracy through #epochs', fontweight='bold')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("dnn_hist.png",dpi=300)
 
 
 if __name__ == '__main__':
@@ -128,11 +130,9 @@ if __name__ == '__main__':
     # Ensure reproducibility
     np.random.seed(CUSTOM_SEED)
 
-    sentences = brown.tagged_sents(tagset='universal')
-    print('a random sentence: \n-> {}'.format(random.choice(sentences)))
+    sentences = brown.tagged_sents( tagset='universal')
 
     tags = set([tag for sentence in treebank.tagged_sents() for _, tag in sentence])
-    print('nb_tags: {}\ntags: {}'.format(len(tags), tags))
 
     # We use approximately 60% of the tagged sentences for training,
     # 20% as the validation set and 20% to evaluate our model.
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     clf = KerasClassifier(**model_params)
 
     # Finally, fit our classifier
-    hist = clf.fit(X_train_vect, y_train_dummy)
+    hist = clf.fit(X_train_vect, y_train_dummy,epochs=100,callbacks=[early_stopping])
 
     # Plot model performance
     plot_model_performance(
@@ -211,3 +211,7 @@ if __name__ == '__main__':
 
     # Finally save model
     clf.model.save('/tmp/dnn_keras_mlp.h5')
+
+
+
+   

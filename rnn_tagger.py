@@ -8,7 +8,10 @@ from sklearn.model_selection import train_test_split
 from keras import backend as K
 import numpy as np
 from nltk.corpus import brown
+from keras.callbacks import EarlyStopping
+import matplotlib.pyplot as plt
 
+early_stopping = EarlyStopping(patience=2) # 조기종료 콜백함수 정의
 
 def to_categorical(sequences, categories):
     cat_sequences = []
@@ -44,6 +47,39 @@ def ignore_class_accuracy(to_ignore=0):
         return accuracy
 
     return ignore_accuracy
+
+def plot_model_performance(train_loss, train_acc, train_val_loss, train_val_acc):
+    """ Plot model loss and accuracy through epochs. """
+
+    green = '#72C29B'
+    orange = '#FFA577'
+
+    with plt.xkcd():
+        fig, (ax1, ax2) = plt.subplots(2, figsize=(10, 8))
+        ax1.plot(range(1, len(train_loss) + 1), train_loss, green, linewidth=5,
+                 label='training')
+        ax1.plot(range(1, len(train_val_loss) + 1), train_val_loss, orange,
+                 linewidth=5, label='validation')
+        ax1.set_xlabel('# epoch')
+        ax1.set_ylabel('loss')
+        ax1.tick_params('y')
+        ax1.legend(loc='upper right', shadow=False)
+        ax1.set_title('Model loss through #epochs', fontweight='bold')
+
+        ax2.plot(range(1, len(train_acc) + 1), train_acc, green, linewidth=5,
+                 label='training')
+        ax2.plot(range(1, len(train_val_acc) + 1), train_val_acc, orange,
+                 linewidth=5, label='validation')
+        ax2.set_xlabel('# epoch')
+        ax2.set_ylabel('accuracy')
+        ax2.tick_params('y')
+        ax2.legend(loc='lower right', shadow=False)
+        ax2.set_title('Model accuracy through #epochs', fontweight='bold')
+
+    plt.tight_layout()
+    plt.savefig("rnn_hist.png",dpi=300)
+
+
 
 
 if __name__ == '__main__':
@@ -126,7 +162,14 @@ if __name__ == '__main__':
 
     model.summary()
 
-    model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=10, validation_split=0.2)
+    hist =  model.fit(train_sentences_X, to_categorical(train_tags_y, len(tag2index)), batch_size=128, epochs=10, validation_split=0.2,callbacks=[early_stopping])
+
+    plot_model_performance(
+        train_loss=hist.history.get('loss', []),
+        train_acc=hist.history.get('acc', []),
+        train_val_loss=hist.history.get('val_loss', []),
+        train_val_acc=hist.history.get('val_acc', [])
+    )
 
     score = model.evaluate(test_sentences_X, to_categorical(test_tags_y, len(tag2index)), verbose=0)
     print(model.metrics_names)
